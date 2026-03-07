@@ -6,6 +6,7 @@ import Homepage from './pages/Homepage'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import { Editorpage } from './pages/Editorpage';
+import ProfilePage from './pages/Profile';
 function App() {
 
 
@@ -16,6 +17,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/editor" element={<Editorpage />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Routes>
 
     </>

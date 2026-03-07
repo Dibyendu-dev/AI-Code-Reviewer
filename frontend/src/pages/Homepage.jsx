@@ -9,6 +9,12 @@ export default function Homepage() {
     navigate('/login');
   };
 
+  const goProfile = () => {
+    const token = localStorage.getItem("token");
+    if (!token) return navigate("/login");
+    navigate("/profile");
+  };
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       {/* Header */}
@@ -16,6 +22,13 @@ export default function Homepage() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="text-xl font-semibold tracking-wide">AI Code Analyzer</h1>
           <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              className="rounded-2xl"
+              onClick={goProfile}
+            >
+                Profile
+            </Button>
             <Button
               variant="outline"
               className="border-white text-white hover:bg-white hover:text-black rounded-2xl"

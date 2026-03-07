@@ -1,7 +1,8 @@
-from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
+
+from .views import review_code
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/', include('review.urls')),
+    # exposed at /api/review/ via project urls
+    path('', review_code, name='review-code'),
 ]

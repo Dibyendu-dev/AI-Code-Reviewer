@@ -6,8 +6,13 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await register(form);
+    try {
+    const resp = await register(form);
     alert("Registered Successfully");
+  } catch (err) {
+    console.error(err.response?.data || err);
+    alert("Registration failed: " + JSON.stringify(err.response?.data));
+  }
   };
 
   return (
