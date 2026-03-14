@@ -32,17 +32,17 @@ export const Editorcmp = () => {
 
     setLoading(true);
 
-    const response = await fetch("http://localhost:5000/review", {
+    const formData = new FormData();
+    formData.append('code', code);
+
+    const response = await fetch("http://localhost:8000/api/review/", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ code })
+      body: formData
     });
 
     const data = await response.json();
 
-    setReview(data.review);
+    setReview(data.review ?? data.error ?? "Unexpected response");
     setLoading(false);
   }
 
