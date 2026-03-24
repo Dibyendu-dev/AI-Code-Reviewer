@@ -1,4 +1,6 @@
 import os
+import json
+from .schema import CodeReviewSchema
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import google.generativeai as genai
@@ -28,7 +30,6 @@ def review_code(request):
     if not code:
         # As a last resort, attempt to parse raw JSON body.
         try:
-            import json
             body = request.body.decode("utf-8")
             parsed = json.loads(body) if body else {}
             code = parsed.get("code")
@@ -51,27 +52,63 @@ def review_code(request):
         )
 
     prompt = f"""
-    You are a senior software engineer.
+        You are a senior code reviewer AI.
 
-    Review this code and return:
-    1. Bugs
-    2. Security issues
-    3. Improvements
-    4. Suggested fixes
+        Analyze the given code and return ONLY valid JSON.
 
-    Code:
-    {code}
-    """
+        STRICT OUTPUT FORMAT:
+
+        {{
+        "overallScore": number (0-10),
+        "summary": string,
+        "issues": [
+            {{
+            "title": string,
+            "description": string,
+            "severity": "LOW" | "MEDIUM" | "HIGH",
+            "line": number or null
+            }}
+        ],
+        "suggestions": [
+            {{
+            "improvement": string,
+            "example_fix": string
+            }}
+        ],
+        "strengths": [string]
+        }}
+
+        Rules:
+        - Do NOT return anything except JSON
+        - No markdown
+        - No explanations outside JSON
+
+        Code:
+        {code}
+        """
 
     try:
+        response = model.generate_content(
+            prompt,
+            generation_config={
+                "response_mime_type": "application/json"
+            }
+        )
 
-        response = model.generate_content(prompt)
+        raw_output = response.text
 
-        review = response.text
+        # Clean Gemini weird formatting (important)
+        cleaned = raw_output.strip().replace("```json", "").replace("```", "")
 
-        return Response({
-            "review": review
-        })
+        parsed_json = json.loads(cleaned)
+
+        # Validate with schema
+        validated = CodeReviewSchema(**parsed_json)
+
+        return Response(validated.dict())
 
     except Exception as e:
-        return Response({"error": str(e)}, status=500)
+        return Response({
+            "error": str(e),
+            "raw_output": raw_output if 'raw_output' in locals() else None
+        }, status=500)
